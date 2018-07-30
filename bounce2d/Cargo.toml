@@ -4,3 +4,7 @@ version = "0.1.0"
 authors = ["Mike Moran <lazysurefix@gmail.com>"]
 
 [dependencies]
+nalgebra   = "0.16"
+ncollide3d = "0.17"
+nphysics3d = "0.9"
+nphysics_testbed3d = "0.1"
