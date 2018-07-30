@@ -1,0 +1,6 @@
+[package]
+name = "bounce2d"
+version = "0.1.0"
+authors = ["Mike Moran <lazysurefix@gmail.com>"]
+
+[dependencies]
