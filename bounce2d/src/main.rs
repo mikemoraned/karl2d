@@ -4,7 +4,7 @@ extern crate nphysics3d;
 extern crate nphysics_testbed3d;
 
 use na::{Isometry3, Point3, Vector3};            // For configuring and positioning bodies.
-use ncollide3d::shape::{Cuboid, ShapeHandle};    // Shapes for colliders.
+use ncollide3d::shape::{Cuboid, Ball, ShapeHandle};    // Shapes for colliders.
 use nphysics3d::object::{BodyHandle, Material};  // Body handle and collider material.
 use nphysics3d::volumetric::Volumetric;          // To retrieve the center of mass and inertia properties of a shape.
 use nphysics3d::world::World;                    // The physics world to be initialized.
@@ -14,7 +14,11 @@ fn main() {
     let mut world = World::new();
     world.set_gravity(Vector3::y() * -9.81);
  
+    // world.set_gravity(Vector3::y() * -9.81 / 4.0);
+
     const COLLIDER_MARGIN: f32 = 0.01;
+    const RESTITUTION: f32 = 0.8;
+    const FRICTION: f32 = 1.0;
 
     let ground_size = 50.0;
     let ground_shape =
@@ -26,10 +30,13 @@ fn main() {
         ground_shape,
         BodyHandle::ground(),
         ground_pos,
-        Material::default(),
+        // Material::default(),
+        nphysics3d::object::Material::new(RESTITUTION, FRICTION),
     );
 
-    let num = 7; // There will be 7 * 7 * 7 = 343 boxes here.
+    // world.integration_parameters_mut().dt = (1.0/60.0) * 2.0;
+
+    let num = 1; 
     let rad = 0.1;
     let shift = rad * 2.0;
     let centerx = shift * (num as f32) / 2.0;
@@ -37,8 +44,10 @@ fn main() {
     let centerz = shift * (num as f32) / 2.0;
     let height = 2.0;
 
-    let geom = ShapeHandle::new(Cuboid::new(Vector3::repeat(rad - COLLIDER_MARGIN)));
+    // let geom = ShapeHandle::new(Cuboid::new(Vector3::repeat(rad - COLLIDER_MARGIN)));
+    let geom = ShapeHandle::new(Ball::new(rad - COLLIDER_MARGIN));
     let inertia = geom.inertia(1.0);
+    // let inertia = geom.inertia(0.01);
     let center_of_mass = geom.center_of_mass();
 
     for i in 0usize..num {
@@ -62,7 +71,8 @@ fn main() {
                     geom.clone(),
                     handle,
                     Isometry3::identity(),
-                    Material::default(),
+                    // Material::default(),
+                    nphysics3d::object::Material::new(RESTITUTION, FRICTION),
                 );
             }
         }
