@@ -85,7 +85,7 @@ fn main() {
 
     let fitness_calc = FitnessCalc { goal: &goal };
 
-    genetic_algorithm()
+    let ga = genetic_algorithm()
         .with_evaluation(fitness_calc)
         .with_selection(MaximizeSelector::new(0.7, 2))
         .with_crossover(MultiPointCrossBreeder::new(goal.target_length / 6))
@@ -97,4 +97,28 @@ fn main() {
         ))
         .with_initial_population(initial_population)
         .build();
+
+    let mut sim = simulate(ga)
+        .until(GenerationLimit::new(2000))
+        .build();
+
+    loop {
+        let result = sim.step();
+        match result {
+            Ok(SimResult::Intermediate(step)) => {
+                let best_solution = step.result.best_solution;
+                println!("{:?}", best_solution.solution.genome.as_path());
+            },
+            Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
+                let best_solution = step.result.best_solution;
+                println!("{}", stop_reason);
+                println!("{:?}", best_solution.solution.genome.as_path());
+                break;
+            },
+            Err(error) => {
+                println!("{}", error.display());
+                break;
+            },
+        }
+    }
 }
