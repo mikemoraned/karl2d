@@ -79,7 +79,7 @@ fn main() {
     let population_size = 100;
 
     let initial_population: Population<Genotype> = build_population()
-        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, 0, 1))
+        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, 0, 2))
         .of_size(population_size)
         .uniform_at_random();
 
@@ -89,7 +89,7 @@ fn main() {
         .with_evaluation(fitness_calc)
         .with_selection(MaximizeSelector::new(0.7, 2))
         .with_crossover(MultiPointCrossBreeder::new(goal.target_length / 6))
-        .with_mutation(RandomValueMutator::new(0.01, 0, 1))
+        .with_mutation(RandomValueMutator::new(0.01, 0, 2))
         .with_reinsertion(ElitistReinserter::new(
             fitness_calc,
             true,
@@ -99,14 +99,26 @@ fn main() {
         .build();
 
     let mut sim = simulate(ga)
-        .until(GenerationLimit::new(2000))
+        .until(or(
+            GenerationLimit::new(2000),
+            FitnessLimit::new(fitness_calc.highest_possible_fitness())))
         .build();
 
     loop {
         let result = sim.step();
         match result {
             Ok(SimResult::Intermediate(step)) => {
+                let evaluated_population = step.result.evaluated_population;
                 let best_solution = step.result.best_solution;
+                println!(
+                    "Step: generation: {}, average_fitness: {}, \
+                     best fitness: {}, duration: {}, processing_time: {}",
+                    step.iteration,
+                    evaluated_population.average_fitness(),
+                    best_solution.solution.fitness,
+                    step.duration.fmt(),
+                    step.processing_time.fmt()
+                );
                 println!("{:?}", best_solution.solution.genome.as_path());
             },
             Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
