@@ -1,0 +1,8 @@
+[package]
+name = "baldwin"
+version = "0.1.0"
+authors = ["Mike Moran <lazysurefix@gmail.com>"]
+
+[dependencies]
+genevo = "0.1"
+rand = "0.5"
