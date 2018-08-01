@@ -1,0 +1,8 @@
+[package]
+name = "ga"
+version = "0.1.0"
+authors = ["Mike Moran <lazysurefix@gmail.com>"]
+
+[dependencies]
+rsgenetic = "^1.8.0"
+
