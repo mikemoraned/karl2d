@@ -8,16 +8,12 @@ use genevo::types::fmt::Display;
 
 use std::cmp;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-enum PathElement {
-    Forward,
-    Stay
-}
+mod turtle;
+
+use turtle::*;
 
 type Genotype = Vec<u8>;
-
-type Path = Vec<PathElement>;
-type Phenotype = Path;
+type Phenotype = turtle::Path;
 
 trait AsPhenotype {
     fn as_path(&self) -> Phenotype;
@@ -48,11 +44,10 @@ struct FitnessCalc {
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
-        let length = genome.as_path().iter()
-            .fold(0, |acc, e| acc + match e {
-                PathElement::Forward => 1,
-                _ => 0
-            });
+        let path = genome.as_path();
+        let start = turtle::Turtle{ x: 0 };
+        let end = start.move_along_path(&path); 
+        let length = end.x;
         cmp::min(self.goal.target_length, length)
     }
 
