@@ -36,17 +36,17 @@ impl AsPhenotype for Genotype {
     }
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 struct Goal {
     target_length : usize,
 }
 
 #[derive(Clone, Copy)]
-struct FitnessCalc<'a> {
-    goal: &'a Goal,
+struct FitnessCalc {
+    goal: Goal,
 }
 
-impl<'a> FitnessFunction<Genotype, usize> for FitnessCalc<'a> {
+impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
         let length = genome.as_path().iter()
             .fold(0, |acc, e| acc + match e {
@@ -83,7 +83,7 @@ fn main() {
         .of_size(population_size)
         .uniform_at_random();
 
-    let fitness_calc = FitnessCalc { goal: &goal };
+    let fitness_calc = FitnessCalc { goal };
 
     let ga = genetic_algorithm()
         .with_evaluation(fitness_calc)
@@ -121,7 +121,7 @@ fn main() {
                 );
                 println!("{:?}", best_solution.solution.genome.as_path());
             },
-            Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
+            Ok(SimResult::Final(step, _, _, stop_reason)) => {
                 let best_solution = step.result.best_solution;
                 println!("{}", stop_reason);
                 println!("{:?}", best_solution.solution.genome.as_path());
