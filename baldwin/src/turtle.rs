@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum PathElement {
+pub enum Instruction {
     Forward,
     Stay
 }
@@ -9,22 +9,20 @@ pub struct Turtle {
     pub x: usize
 }
 
-pub type Path = Vec<PathElement>;
-
-pub trait TurtleMovement {
-    fn move_along_path(self: &Self, path: &Path) -> Turtle;
-    fn move_along_element(self: &Self, element: &PathElement) -> Turtle;
+pub trait Application {
+    fn apply_instructions(self: &Self, instructions: &Vec<Instruction>) -> Turtle;
+    fn apply_instruction(self: &Self, instruction: &Instruction) -> Turtle;
 }
 
-impl TurtleMovement for Turtle {
-    fn move_along_path(self: &Self, path: &Path) -> Self {
-        return path.iter()
-            .fold(*self, |turtle, element| turtle.move_along_element(&element) );
+impl Application for Turtle {
+    fn apply_instructions(self: &Self, instructions: &Vec<Instruction>) -> Self {
+        return instructions.iter()
+            .fold(*self, |turtle, i| turtle.apply_instruction(&i) );
     }
 
-    fn move_along_element(self: &Self, element: &PathElement) -> Self {
-        match element {
-            PathElement::Forward => Self{ x: self.x + 1 },
+    fn apply_instruction(self: &Self, instruction: &Instruction) -> Self {
+        match instruction {
+            Instruction::Forward => Self{ x: self.x + 1 },
             _ => *self
         }   
     }

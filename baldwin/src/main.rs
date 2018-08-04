@@ -13,22 +13,22 @@ mod turtle;
 use turtle::*;
 
 type Genotype = Vec<u8>;
-type Phenotype = turtle::Path;
+type Phenotype = Vec<Instruction>;
 
 trait AsPhenotype {
-    fn as_path(&self) -> Phenotype;
+    fn as_instructons(&self) -> Phenotype;
 }
 
 impl AsPhenotype for Genotype {
-    fn as_path(&self) -> Phenotype {
-        fn as_path_element(i: &u8) -> PathElement {
+    fn as_instructons(&self) -> Phenotype {
+        fn as_instruction(i: &u8) -> Instruction {
             match i {
-                0 => PathElement::Forward,
-                _ => PathElement::Stay
+                0 => Instruction::Forward,
+                _ => Instruction::Stay
             }
         }
 
-        self.iter().map(|i| as_path_element(i)).collect()
+        self.iter().map(|i| as_instruction(i)).collect()
     }
 }
 
@@ -44,9 +44,9 @@ struct FitnessCalc {
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
-        let path = genome.as_path();
+        let instructions = genome.as_instructons();
         let start = turtle::Turtle{ x: 0 };
-        let end = start.move_along_path(&path); 
+        let end = start.apply_instructions(&instructions); 
         let length = end.x;
         cmp::min(self.goal.target_length, length)
     }
@@ -114,12 +114,12 @@ fn main() {
                     step.duration.fmt(),
                     step.processing_time.fmt()
                 );
-                println!("{:?}", best_solution.solution.genome.as_path());
+                println!("{:?}", best_solution.solution.genome.as_instructons());
             },
             Ok(SimResult::Final(step, _, _, stop_reason)) => {
                 let best_solution = step.result.best_solution;
                 println!("{}", stop_reason);
-                println!("{:?}", best_solution.solution.genome.as_path());
+                println!("{:?}", best_solution.solution.genome.as_instructons());
                 break;
             },
             Err(error) => {
