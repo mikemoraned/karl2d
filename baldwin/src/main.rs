@@ -11,8 +11,25 @@ use genevo::types::fmt::Display;
 use std::cmp;
 
 mod turtle;
+mod encoding;
 
 use turtle::*;
+use encoding::*;
+
+enum Base {
+    End,
+    Instruction(turtle::Instruction)
+}
+
+impl IntegerEncoding for Base {
+    fn min_u8_value() -> u8 {
+        0
+    }
+    
+    fn max_u8_value() -> u8 {
+        Instruction::max_u8_value() + 1
+    }
+}
 
 type Genotype = Vec<u8>;
 type Phenotype = Vec<Instruction>;
@@ -26,11 +43,22 @@ impl AsPhenotype for Genotype {
         fn as_instruction(integer: &u8) -> Instruction {
             match num::FromPrimitive::from_u8(*integer) {
                 Some(instruction) => instruction,
-                None => panic!("integer {} not mappable")
+                None => panic!(format!("integer {} not mappable", integer))
             }
         }
 
-        self.iter().map(|i| as_instruction(i)).collect()
+        fn apply_offset(g: Genotype, offset: u8) -> Genotype {
+            g.iter().map(|&i| i - offset).collect()
+        }
+
+        fn cut_at_first_end(g: &Genotype) -> Genotype {
+            match g.iter().position(|&i| i == 0) {
+                Some(p) => g[0..p].to_vec(),
+                None => g.to_vec()
+            }
+        }
+
+        apply_offset(cut_at_first_end(self), 1).iter().map(|i| as_instruction(i)).collect()
     }
 }
 
@@ -76,7 +104,7 @@ fn main() {
     let population_size = 100;
 
     let initial_population: Population<Genotype> = build_population()
-        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, Instruction::min_u8_value(), Instruction::max_u8_value() + 1))
+        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, Base::min_u8_value(), Base::max_u8_value() + 1))
         .of_size(population_size)
         .uniform_at_random();
 
@@ -86,7 +114,7 @@ fn main() {
         .with_evaluation(fitness_calc)
         .with_selection(MaximizeSelector::new(0.7, 2))
         .with_crossover(MultiPointCrossBreeder::new(goal.target_length / 6))
-        .with_mutation(RandomValueMutator::new(0.01, Instruction::min_u8_value(), Instruction::max_u8_value() + 1))
+        .with_mutation(RandomValueMutator::new(0.01, Base::min_u8_value(), Base::max_u8_value() + 1))
         .with_reinsertion(ElitistReinserter::new(
             fitness_calc,
             true,
