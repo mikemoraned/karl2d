@@ -1,5 +1,8 @@
 extern crate genevo;
 extern crate rand;
+extern crate num;
+#[macro_use]
+extern crate num_derive;
 
 use genevo::operator::prelude::*;
 use genevo::population::ValueEncodedGenomeBuilder;
@@ -21,10 +24,10 @@ trait AsPhenotype {
 
 impl AsPhenotype for Genotype {
     fn as_instructons(&self) -> Phenotype {
-        fn as_instruction(i: &u8) -> Instruction {
-            match i {
-                0 => Instruction::Forward,
-                _ => Instruction::Stay
+        fn as_instruction(integer: &u8) -> Instruction {
+            match num::FromPrimitive::from_u8(*integer) {
+                Some(instruction) => instruction,
+                None => panic!("integer {} not mappable")
             }
         }
 

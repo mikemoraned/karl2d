@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, FromPrimitive)]
 pub enum Instruction {
     Forward,
     Stay
