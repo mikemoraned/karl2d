@@ -1,8 +1,7 @@
 extern crate genevo;
 extern crate rand;
 extern crate num;
-#[macro_use]
-extern crate num_derive;
+#[macro_use] extern crate num_derive;
 
 use genevo::operator::prelude::*;
 use genevo::population::ValueEncodedGenomeBuilder;
@@ -77,7 +76,7 @@ fn main() {
     let population_size = 100;
 
     let initial_population: Population<Genotype> = build_population()
-        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, 0, 2))
+        .with_genome_builder(ValueEncodedGenomeBuilder::new(goal.target_length, Instruction::min_u8_value(), Instruction::max_u8_value() + 1))
         .of_size(population_size)
         .uniform_at_random();
 
@@ -87,7 +86,7 @@ fn main() {
         .with_evaluation(fitness_calc)
         .with_selection(MaximizeSelector::new(0.7, 2))
         .with_crossover(MultiPointCrossBreeder::new(goal.target_length / 6))
-        .with_mutation(RandomValueMutator::new(0.01, 0, 2))
+        .with_mutation(RandomValueMutator::new(0.01, Instruction::min_u8_value(), Instruction::max_u8_value() + 1))
         .with_reinsertion(ElitistReinserter::new(
             fitness_calc,
             true,
